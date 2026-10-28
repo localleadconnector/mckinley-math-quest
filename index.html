@@ -41,7 +41,7 @@ button.ctl.on{background:#2563eb}
 <div class="msg" id="msg"></div><div class="hint" id="hint"></div></div>
 <hr style="border-color:#334155;margin:24px 0"><h1>✖️ Times Table Keyboard</h1>
 <div class="top"><button class="ctl on" id="kbE" onclick="kSetMode('explore')">Explore</button><button class="ctl" id="kbQ" onclick="kSetMode('quiz')">Quiz Me</button><button class="ctl" onclick="kHideAll()">Hide All</button></div>
-<div id="kInfo">Tap any key to see the answer!</div>
+<div id="kInfo">Press and hold a key to see the answer!</div>
 <div class="grid" id="kg"></div>
 <p style="color:#94a3b8">Tip: do 5 problems, then take a 2-minute break!</p>
 <script>
@@ -82,9 +82,17 @@ kg.innerHTML=kh;
 const keys=[...document.querySelectorAll(".k")];
 function kHideAll(){keys.forEach(k=>{k.textContent="";k.className="k"})}
 function kTap(k){const r=+k.dataset.r,c=+k.dataset.c;
- if(kMode=="explore"){keys.forEach(x=>x.classList.remove("hl"));k.textContent=r*c;k.classList.add("show","hl");kInfo.textContent=`${r} × ${c} = ${r*c}`;return}
+ if(kMode=="explore"){return;keys.forEach(x=>x.classList.remove("hl"));k.textContent=r*c;k.classList.add("show","hl");kInfo.textContent=`${r} × ${c} = ${r*c}`;return}
  if(r==kTarget[0]&&c==kTarget[1]){kScore++;k.textContent=r*c;k.className="k right";kInfo.textContent=`Yes! ${r} × ${c} = ${r*c} 🎉 Score: ${kScore}`;setTimeout(kAsk,1300)}
  else{k.classList.add("wrong");kInfo.textContent=`That's ${r} × ${c}. Find ${kTarget[0]} × ${kTarget[1]}: row ${kTarget[0]}, column ${kTarget[1]}!`;setTimeout(()=>k.classList.remove("wrong"),600)}}
 function kAsk(){kHideAll();kTarget=[1+Math.floor(Math.random()*12),1+Math.floor(Math.random()*12)];kInfo.textContent=`Tap the key for ${kTarget[0]} × ${kTarget[1]}  (Score: ${kScore})`}
-function kSetMode(m){kMode=m;kbE.className="ctl"+(m=="explore"?" on":"");kbQ.className="ctl"+(m=="quiz"?" on":"");kHideAll();if(m=="quiz")kAsk();else kInfo.textContent="Tap any key to see the answer!"}
+function kSetMode(m){kMode=m;kbE.className="ctl"+(m=="explore"?" on":"");kbQ.className="ctl"+(m=="quiz"?" on":"");kHideAll();if(m=="quiz")kAsk();else kInfo.textContent="Press and hold a key to see the answer!"}
+
+document.querySelectorAll(".k").forEach(k=>{
+ const r=+k.dataset.r,c=+k.dataset.c;
+ const down=e=>{if(kMode!="explore")return;e.preventDefault();k.textContent=r*c;k.classList.add("show","hl");kInfo.textContent=`${r} × ${c} = ${r*c}`};
+ const up=()=>{if(kMode!="explore")return;k.textContent="";k.classList.remove("show","hl")};
+ k.addEventListener("pointerdown",down);["pointerup","pointerleave","pointercancel"].forEach(ev=>k.addEventListener(ev,up));
+ k.style.touchAction="none";k.style.userSelect="none";k.style.webkitUserSelect="none";
+});
 </script></body></html>
