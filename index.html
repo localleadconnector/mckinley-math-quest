@@ -32,10 +32,14 @@ button.ctl.on{background:#2563eb}
 .h{background:#2563eb;display:flex;align-items:center;justify-content:center;border-radius:7px;font-weight:700;font-size:clamp(10px,3vw,20px)}
 .k.show{background:#38bdf8;color:#0f172a}.k.hl{outline:3px solid #fde047}.k.right{background:#4ade80;color:#0f172a}.k.wrong{background:#f87171}
 #pop{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#fde047;color:#0f172a;font-size:44px;font-weight:800;padding:14px 28px;border-radius:18px;box-shadow:0 6px 24px #0008;display:none;z-index:99;pointer-events:none;white-space:nowrap}
+.fcsel{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:10px 0}
+.fcsel button{font-size:16px;border:0;border-radius:9px;padding:8px 12px;background:#334155;color:#fff;min-width:44px}.fcsel button.on{background:#2563eb}
+#fcard{max-width:340px;height:200px;margin:12px auto;border-radius:20px;background:#fff;color:#0f172a;display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:800;cursor:pointer;user-select:none;box-shadow:0 6px 20px #0006}
+#fcard.back{background:#4ade80}
 </style></head><body>
 <h1>🚀 McKinley's Math Quest</h1>
 <div class="stats"><div class="stat"><b id="score">0</b>Correct</div><div class="stat"><b id="streak">0</b>Streak 🔥</div><div class="stat"><b id="level">Rookie</b>Level</div></div>
-<div class="modes" id="modes"></div><div class="row"><button class="go" onclick="document.getElementById('kg').scrollIntoView()">✖️ Times Table Keyboard ↓</button></div>
+<div class="modes" id="modes"></div><div class="row"><button class="go" onclick="document.getElementById('kg').scrollIntoView()">✖️ Times Table Keyboard ↓</button><button class="go" onclick="fcTop.scrollIntoView()">🃏 Flash Cards ↓</button></div>
 <div class="card"><div class="q" id="q"></div><div class="prob" id="prob"></div><div class="bar" id="bar"></div>
 <input id="ans" placeholder="answer" autocomplete="off">
 <div class="row"><button class="go" onclick="check()">Check</button><button onclick="hint()">Hint</button><button onclick="next()">New problem</button></div>
@@ -44,6 +48,12 @@ button.ctl.on{background:#2563eb}
 <div class="top"><button class="ctl on" id="kbE" onclick="kSetMode('explore')">Explore</button><button class="ctl" id="kbQ" onclick="kSetMode('quiz')">Quiz Me</button><button class="ctl" onclick="kHideAll()">Hide All</button></div>
 <div id="kInfo">Press and hold a key to see the answer!</div>
 <div class="grid" id="kg"></div>
+<hr style="border-color:#334155;margin:24px 0"><h1 id="fcTop">🃏 Flash Cards</h1>
+<div class="fcsel" id="fcSel"></div>
+<div id="fcProg" style="color:#cbd5e1"></div>
+<div id="fcard" onclick="fcFlip()"></div>
+<div style="color:#94a3b8">Tap the card to flip it</div>
+<div class="row"><button class="go" style="background:#16a34a" onclick="fcNext(true)">✅ Got it</button><button onclick="fcNext(false)">🔁 Practice again</button></div>
 <p style="color:#94a3b8">Tip: do 5 problems, then take a 2-minute break!</p>
 <script>
 const modes={bars:"Fraction Bars",mfrac:"Multiply Fractions",mult:"Multiply",div:"Divide",equiv:"Same Fractions",add:"Add Fractions",compare:"Bigger?"};
@@ -96,4 +106,11 @@ document.querySelectorAll(".k").forEach(k=>{
  k.addEventListener("pointerdown",down);["pointerup","pointerleave","pointercancel"].forEach(ev=>k.addEventListener(ev,up));
  k.style.touchAction="none";k.style.userSelect="none";k.style.webkitUserSelect="none";
 });
+let fcT="all",fcDeck=[],fcCur=null,fcDone=0,fcTotal=0,fcBack=false;
+function fcDraw(){fcSel.innerHTML=["all",1,2,3,4,5,6,7,8,9,10,11,12].map(t=>`<button class="${t==fcT?"on":""}" onclick="fcSet('${t}')">${t=="all"?"All":t+"s"}</button>`).join("")}
+function fcSet(t){fcT=t;fcDraw();fcDeck=[];const ts=t=="all"?[1,2,3,4,5,6,7,8,9,10,11,12]:[+t];ts.forEach(a=>{for(let b=1;b<=12;b++)fcDeck.push([a,b])});fcDeck.sort(()=>Math.random()-.5);fcDone=0;fcTotal=fcDeck.length;fcShow()}
+function fcShow(){fcBack=false;fcard.className="";if(!fcDeck.length){fcard.textContent="🎉 Done!";fcProg.textContent=`You finished all ${fcTotal} cards!`;fcCur=null;return}fcCur=fcDeck[0];fcard.textContent=`${fcCur[0]} × ${fcCur[1]}`;fcProg.textContent=`Mastered ${fcDone} of ${fcTotal}`}
+function fcFlip(){if(!fcCur)return;fcBack=!fcBack;fcard.className=fcBack?"back":"";fcard.textContent=fcBack?`${fcCur[0]*fcCur[1]}`:`${fcCur[0]} × ${fcCur[1]}`}
+function fcNext(ok){if(!fcCur)return;const c=fcDeck.shift();if(ok)fcDone++;else fcDeck.splice(Math.min(3,fcDeck.length),0,c);fcShow()}
+fcSet("all");
 </script><div id="pop"></div></body></html>
