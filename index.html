@@ -31,6 +31,7 @@ button.ctl.on{background:#2563eb}
 .k{aspect-ratio:1;border:0;border-radius:7px;background:#1e293b;color:#fff;font-size:clamp(10px,3vw,20px);font-weight:600;padding:0}
 .h{background:#2563eb;display:flex;align-items:center;justify-content:center;border-radius:7px;font-weight:700;font-size:clamp(10px,3vw,20px)}
 .k.show{background:#38bdf8;color:#0f172a}.k.hl{outline:3px solid #fde047}.k.right{background:#4ade80;color:#0f172a}.k.wrong{background:#f87171}
+#pop{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#fde047;color:#0f172a;font-size:44px;font-weight:800;padding:14px 28px;border-radius:18px;box-shadow:0 6px 24px #0008;display:none;z-index:99;pointer-events:none;white-space:nowrap}
 </style></head><body>
 <h1>🚀 McKinley's Math Quest</h1>
 <div class="stats"><div class="stat"><b id="score">0</b>Correct</div><div class="stat"><b id="streak">0</b>Streak 🔥</div><div class="stat"><b id="level">Rookie</b>Level</div></div>
@@ -90,9 +91,9 @@ function kSetMode(m){kMode=m;kbE.className="ctl"+(m=="explore"?" on":"");kbQ.cla
 
 document.querySelectorAll(".k").forEach(k=>{
  const r=+k.dataset.r,c=+k.dataset.c;
- const down=e=>{if(kMode!="explore")return;e.preventDefault();k.textContent=r*c;k.classList.add("show","hl");kInfo.textContent=`${r} × ${c} = ${r*c}`};
- const up=()=>{if(kMode!="explore")return;k.textContent="";k.classList.remove("show","hl")};
+ const down=e=>{if(kMode!="explore")return;e.preventDefault();k.textContent=r*c;k.classList.add("show","hl");kInfo.textContent=`${r} × ${c} = ${r*c}`;pop.textContent=`${r} × ${c} = ${r*c}`;pop.style.display="block"};
+ const up=()=>{if(kMode!="explore")return;k.textContent="";k.classList.remove("show","hl");pop.style.display="none"};
  k.addEventListener("pointerdown",down);["pointerup","pointerleave","pointercancel"].forEach(ev=>k.addEventListener(ev,up));
  k.style.touchAction="none";k.style.userSelect="none";k.style.webkitUserSelect="none";
 });
-</script></body></html>
+</script><div id="pop"></div></body></html>
