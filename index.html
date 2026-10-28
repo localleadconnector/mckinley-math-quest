@@ -1,0 +1,90 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>McKinley's Math Quest</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#0f172a;color:#f1f5f9;margin:0;padding:16px;text-align:center}
+h1{font-size:26px;margin:8px 0}
+.stats{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:10px 0}
+.stat{background:#1e293b;border-radius:12px;padding:8px 14px}.stat b{display:block;font-size:22px;color:#38bdf8}
+.modes{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:12px 0}
+button{font-size:17px;border:0;border-radius:10px;padding:10px 16px;background:#334155;color:#fff;cursor:pointer}
+button.on,button.go{background:#2563eb}
+.card{background:#1e293b;border-radius:16px;padding:18px;max-width:520px;margin:12px auto}
+.q{font-size:18px;color:#cbd5e1}.prob{font-size:40px;margin:14px 0;display:flex;justify-content:center;align-items:center;gap:14px}
+.frac{display:inline-flex;flex-direction:column;align-items:center}.frac span:first-child{border-bottom:3px solid #fff;padding:0 8px}
+.bar{display:flex;gap:3px;margin:10px 0}.bar div{flex:1;height:34px;border-radius:5px;background:#475569}.bar div.f{background:#38bdf8}
+input{font-size:22px;padding:10px;border-radius:10px;border:2px solid #475569;width:140px;text-align:center;background:#0f172a;color:#fff}
+.row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:12px}
+.msg{margin-top:12px;font-size:19px;min-height:24px}.ok{color:#4ade80}.no{color:#fbbf24}.hint{color:#93c5fd;margin-top:8px}
+.pair{display:flex;justify-content:center;gap:40px;margin:14px 0 18px}
+.vbar{display:flex;flex-direction:column;width:70px;height:260px;border:4px solid #38bdf8;border-radius:6px;background:#fff;overflow:hidden}
+.vbar div{flex:1;border-top:3px solid #38bdf8}.vbar div:first-child{border-top:0}.vbar div.f{background:#38bdf8;opacity:.75}
+.lbl{color:#cbd5e1;margin-top:6px}
+#bar{display:block}
+
+.kb_body{font-family:system-ui,sans-serif;background:#0f172a;color:#f1f5f9;margin:0;padding:10px;text-align:center}
+.kbh1{font-size:22px;margin:6px 0}
+.top{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px 0}
+button.ctl{font-size:16px;border:0;border-radius:10px;padding:9px 14px;background:#334155;color:#fff}
+button.ctl.on{background:#2563eb}
+#info{font-size:20px;min-height:28px;margin:6px 0;color:#fde047}
+.grid{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;max-width:900px;margin:0 auto}
+.k{aspect-ratio:1;border:0;border-radius:7px;background:#1e293b;color:#fff;font-size:clamp(10px,3vw,20px);font-weight:600;padding:0}
+.h{background:#2563eb;display:flex;align-items:center;justify-content:center;border-radius:7px;font-weight:700;font-size:clamp(10px,3vw,20px)}
+.k.show{background:#38bdf8;color:#0f172a}.k.hl{outline:3px solid #fde047}.k.right{background:#4ade80;color:#0f172a}.k.wrong{background:#f87171}
+</style></head><body>
+<h1>🚀 McKinley's Math Quest</h1>
+<div class="stats"><div class="stat"><b id="score">0</b>Correct</div><div class="stat"><b id="streak">0</b>Streak 🔥</div><div class="stat"><b id="level">Rookie</b>Level</div></div>
+<div class="modes" id="modes"></div><div class="row"><button class="go" onclick="document.getElementById('kg').scrollIntoView()">✖️ Times Table Keyboard ↓</button></div>
+<div class="card"><div class="q" id="q"></div><div class="prob" id="prob"></div><div class="bar" id="bar"></div>
+<input id="ans" placeholder="answer" autocomplete="off">
+<div class="row"><button class="go" onclick="check()">Check</button><button onclick="hint()">Hint</button><button onclick="next()">New problem</button></div>
+<div class="msg" id="msg"></div><div class="hint" id="hint"></div></div>
+<hr style="border-color:#334155;margin:24px 0"><h1>✖️ Times Table Keyboard</h1>
+<div class="top"><button class="ctl on" id="kbE" onclick="kSetMode('explore')">Explore</button><button class="ctl" id="kbQ" onclick="kSetMode('quiz')">Quiz Me</button><button class="ctl" onclick="kHideAll()">Hide All</button></div>
+<div id="kInfo">Tap any key to see the answer!</div>
+<div class="grid" id="kg"></div>
+<p style="color:#94a3b8">Tip: do 5 problems, then take a 2-minute break!</p>
+<script>
+const modes={bars:"Fraction Bars",mfrac:"Multiply Fractions",mult:"Multiply",div:"Divide",equiv:"Same Fractions",add:"Add Fractions",compare:"Bigger?"};
+let mode="bars",P,score=0,streak=0;
+const r=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,g=(a,b)=>b?g(b,a%b):a;
+const F=(n,d)=>`<span class="frac"><span>${n}</span><span>${d}</span></span>`;
+function make(){
+ if(mode=="bars"){const d=r(2,6),n=r(1,d-1),k=r(2,3);return{q:`Both bars are the same size. How many of the ${d*k} pieces in bar 2 match the shaded part of bar 1?`,html:F(n,d)+"="+F("?",d*k),ans:""+n*k,hint:`Each piece in bar 1 is split into ${k} smaller pieces. So ${n} × ${k} = ?`,bar:[n,d],bar2:[n*k,d*k]}}
+ if(mode=="mfrac"){if(r(0,1)){const n=r(1,5),d=r(2,9),w=r(2,6);return{q:"Multiply (type like 6/5)",html:`${w} × `+F(n,d),ans:(w*n)+"/"+d,hint:`Whole number times the top: ${w} × ${n}. Keep ${d} on the bottom.`}}
+ const a=r(1,5),b=r(2,6),c=r(1,5),d=r(2,6);return{q:"Multiply (type like 3/8)",html:F(a,b)+"×"+F(c,d),ans:(a*c)+"/"+(b*d),hint:`Top times top: ${a} × ${c}. Bottom times bottom: ${b} × ${d}.`}}
+ if(mode=="mult"){const a=r(2,12),b=r(2,9);return{q:"Multiply",html:`${a} × ${b} = ?`,ans:""+a*b,hint:`Think of ${b} groups of ${a}. Skip count by ${a}, ${b} times.`}}
+ if(mode=="div"){const b=r(2,9),c=r(2,10);return{q:"Divide",html:`${b*c} ÷ ${b} = ?`,ans:""+c,hint:`What times ${b} makes ${b*c}?`}}
+ if(mode=="equiv"){const d=r(2,6),n=r(1,d-1),k=r(2,4);return{q:"Find the missing number",html:F(n,d)+"="+F("?",d*k),ans:""+n*k,hint:`${d} × ${k} = ${d*k}, so do ${n} × ${k} on top.`,bar:[n,d]}}
+ if(mode=="add"){const d=r(3,10),a=r(1,d-2),b=r(1,d-a-1);return{q:"Add (type like 3/5)",html:F(a,d)+"+"+F(b,d),ans:(a+b)+"/"+d,hint:`Same bottom! Add the tops: ${a} + ${b}. Keep ${d} on the bottom.`,bar:[a+b,d]}}
+ const d=r(3,10);let a=r(1,d-1),b=r(1,d-1);while(a==b)b=r(1,d-1);return{q:"Which is bigger? Type the fraction",html:F(a,d)+" or "+F(b,d),ans:Math.max(a,b)+"/"+d,hint:`Same bottom, so the bigger top wins!`}
+}
+function drawModes(){document.getElementById("modes").innerHTML=Object.entries(modes).map(([k,v])=>`<button class="${k==mode?"on":""}" onclick="setMode('${k}')">${v}</button>`).join("")}
+function setMode(m){mode=m;drawModes();next()}
+function next(){P=make();q.textContent=P.q;prob.innerHTML=P.html;const mk=(b,show)=>Array.from({length:b[1]},(_,i)=>`<div class="${show&&i<b[0]?"f":""}"></div>`).join("");
+ const hb=b=>`<div class="bar">${mk(b,1)}</div>`;
+ bar.innerHTML=!P.bar?"":P.bar2?`<div class="pair"><div><div class="vbar">${mk(P.bar,1)}</div><div class="lbl">Bar 1</div></div><div><div class="vbar">${mk(P.bar2,0)}</div><div class="lbl">Bar 2</div></div></div>`:hb(P.bar);ans.value="";msg.textContent="";hint.textContent="";ans.focus()}
+function hint(){document.getElementById("hint").textContent="💡 "+P.hint}
+const cheers=["Nailed it! 🔥","Yes! You're on fire!","Correct! Big brain move 🧠","Boom! Next one!","Perfect! Keep going! ⭐"];
+function check(){const v=ans.value.replace(/\s/g,"");if(!v)return;
+ if(v==P.ans){score++;streak++;msg.className="msg ok";msg.textContent=cheers[r(0,4)];setTimeout(next,1200)}
+ else{streak=0;msg.className="msg no";msg.textContent="Not quite, that's okay! Check the hint and try again.";hint()}
+ document.getElementById("score").textContent=score;document.getElementById("streak").textContent=streak;
+ document.getElementById("level").textContent=score>=20?"Math Master":score>=10?"Ratio Pro":score>=5?"Rising Star":"Rookie"}
+ans.addEventListener("keydown",e=>{if(e.key=="Enter")check()});
+drawModes();next();
+
+let kMode="explore",kTarget=null,kScore=0;
+const kg=document.getElementById("kg"),kInfo=document.getElementById("kInfo");
+let kh='<div class="h">×</div>';for(let c=1;c<=12;c++)kh+=`<div class="h">${c}</div>`;
+for(let r=1;r<=12;r++){kh+=`<div class="h">${r}</div>`;for(let c=1;c<=12;c++)kh+=`<button class="k" data-r="${r}" data-c="${c}" onclick="kTap(this)"></button>`}
+kg.innerHTML=kh;
+const keys=[...document.querySelectorAll(".k")];
+function kHideAll(){keys.forEach(k=>{k.textContent="";k.className="k"})}
+function kTap(k){const r=+k.dataset.r,c=+k.dataset.c;
+ if(kMode=="explore"){keys.forEach(x=>x.classList.remove("hl"));k.textContent=r*c;k.classList.add("show","hl");kInfo.textContent=`${r} × ${c} = ${r*c}`;return}
+ if(r==kTarget[0]&&c==kTarget[1]){kScore++;k.textContent=r*c;k.className="k right";kInfo.textContent=`Yes! ${r} × ${c} = ${r*c} 🎉 Score: ${kScore}`;setTimeout(kAsk,1300)}
+ else{k.classList.add("wrong");kInfo.textContent=`That's ${r} × ${c}. Find ${kTarget[0]} × ${kTarget[1]}: row ${kTarget[0]}, column ${kTarget[1]}!`;setTimeout(()=>k.classList.remove("wrong"),600)}}
+function kAsk(){kHideAll();kTarget=[1+Math.floor(Math.random()*12),1+Math.floor(Math.random()*12)];kInfo.textContent=`Tap the key for ${kTarget[0]} × ${kTarget[1]}  (Score: ${kScore})`}
+function kSetMode(m){kMode=m;kbE.className="ctl"+(m=="explore"?" on":"");kbQ.className="ctl"+(m=="quiz"?" on":"");kHideAll();if(m=="quiz")kAsk();else kInfo.textContent="Tap any key to see the answer!"}
+</script></body></html>
